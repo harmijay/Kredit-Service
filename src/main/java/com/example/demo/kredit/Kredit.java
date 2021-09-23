@@ -1,38 +1,42 @@
 package com.example.demo.kredit;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
+@Getter
+@ToString
 @Entity
 @Table
 public class Kredit {
     @Id
     @SequenceGenerator(
-            name = "credit_sequence",
-            sequenceName = "credit_sequence",
+            name = "kredit_sequence",
+            sequenceName = "kredit_sequence",
             allocationSize = 1
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "credit_sequence"
+            generator = "kredit_sequence"
     )
     private Long id;
-    private Integer nomorNasabah;
-    private String tipe;
-    private LocalDate tenggat;
+    private Integer nomorRekening;
+    private String tipeKredit;
+    private Integer limitKredit;
+    private Long jumlahKredit;
+    private LocalDate tenggatKredit;
+    private String statusKredit;
 
-    public Kredit(Integer nomorNasabah, String tipe, LocalDate tenggat) {
-        this.nomorNasabah = nomorNasabah;
-        this.tipe = tipe;
-        this.tenggat = tenggat;
+    public Kredit(Integer nomorRekening, String tipeKredit, Integer limitKredit, Long jumlahKredit, LocalDate tenggatKredit, String statusKredit) {
+        this.nomorRekening = nomorRekening;
+        this.tipeKredit = tipeKredit;
+        this.limitKredit = limitKredit;
+        this.jumlahKredit = jumlahKredit;
+        this.tenggatKredit = tenggatKredit;
+        this.statusKredit = statusKredit;
     }
 }

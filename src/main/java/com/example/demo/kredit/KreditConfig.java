@@ -19,13 +19,19 @@ public class KreditConfig {
             Kredit satu = new Kredit(
                     0,
                     "Gold",
-                    LocalDate.of(2022, JANUARY, 1)
+                    100,
+                    25L,
+                    LocalDate.of(2022, JANUARY, 1),
+                    "Belum dibayar."
             );
 
             Kredit dua = new Kredit(
                     1,
                     "Silver",
-                    LocalDate.of(2025, Month.DECEMBER, 1)
+                    50,
+                    20L,
+                    LocalDate.of(2025, Month.DECEMBER, 1),
+                    "Belum dibayar."
             );
 
             repository.saveAll(

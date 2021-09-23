@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface KreditRepository
         extends JpaRepository<Kredit, Long> {
 
-    Optional<Kredit> findKreditByNomorNasabah(Integer nomorNasabah);
+    Optional<Kredit> findKreditByNomorRekening(Integer nomorRekening);
 }
