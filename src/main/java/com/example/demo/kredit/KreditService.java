@@ -6,10 +6,17 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.*;
+
+import static java.time.Month.JANUARY;
 
 @Service
 public class KreditService {
+    public static final Integer STATUS_OK = 250;
+    public static final Integer STATUS_GAGAL_NOREK = 451;
+    public static final Integer STATUS_GAGAL_SALDO = 452;
+
     private final KreditRepository kreditRepository;
 
     @Autowired
@@ -21,34 +28,93 @@ public class KreditService {
         return kreditRepository.findAll();
     }
 
-    public void bukaKredit(Kredit kredit) {
-        Optional<Kredit> kreditOptional = kreditRepository.
-                findKreditByNomorRekening(kredit.getNomorRekening());
+    public HashMap<String, Object> bukaKredit(HashMap<String, Object> kreditBaru) {
+        Optional<Kredit> kredit = kreditRepository
+                .findKreditByNomorRekening((Integer) kreditBaru.get("nomorRekening"));
 
-        if (kreditOptional.isPresent()) {
-            throw new IllegalStateException("Nasabah sudah terdaftar!");
+        HashMap<String, Object> response = new HashMap<>();
+
+        if (kredit.isPresent()) {
+            response.put("status", STATUS_GAGAL_NOREK);
+            response.put("pesan", "Nomor rekening sudah terdaftar.");
+        } else {
+            Kredit saveKredit = new Kredit(
+                    (Integer) kreditBaru.get("nomorRekening"),
+                    (String) kreditBaru.get("tipeKredit"),
+                    10,
+                    (Long) kreditBaru.get("jumlahKredit"),
+                    LocalDate.of(2022, JANUARY, 1),
+                    "Belum dibayar"
+            );
+
+            kreditRepository.save(saveKredit);
+            response.put("status", STATUS_OK);
         }
-        kreditRepository.save(kredit);
+        return response;
     }
 
-    public void tutupKredit(Long id) {
-        boolean exists = kreditRepository.existsById(id);
-        if (!exists) {
-            throw new IllegalStateException(
-                    "Kredit dengan ID " + id + " tidak terdaftar!");
+    public HashMap<String, Object> tutupKredit(Integer nomorRekening) {
+        Optional<Kredit> kredit = kreditRepository.findKreditByNomorRekening(nomorRekening);
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if (kredit.isEmpty()) {
+            response.put("status", STATUS_GAGAL_NOREK);
+            response.put("pesan", "Nomor rekening tidak terdaftar.");
+        } else {
+            kreditRepository.deleteById(kredit.get().getId());
+            response.put("status", STATUS_OK);
         }
-        kreditRepository.deleteById(id);
+        return response;
     }
 
     @Transactional
-    public void updateTipeKredit(Integer nomorRekening, String tipeKredit) {
-        Kredit kredit = kreditRepository.findKreditByNomorRekening(nomorRekening)
-                .orElseThrow(() -> new IllegalStateException(
-                        "Nasabah dengan nomor rekening " + nomorRekening + " tidak terdaftar!"));
-        if (tipeKredit != null) {
-            kredit.setTipeKredit(tipeKredit);
-            System.out.println(kredit.getTipeKredit());
+    public HashMap<String, Object> updateTipeKredit(Integer nomorRekening, String tipeKredit) {
+        Optional<Kredit> kredit = kreditRepository.findKreditByNomorRekening(nomorRekening);
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if (kredit.isEmpty()) {
+            response.put("status", STATUS_GAGAL_NOREK);
+            response.put("pesan", "Nomor rekening tidak terdaftar.");
+        } else if (tipeKredit != null) {
+            kredit.get().setTipeKredit(tipeKredit);
+            response.put("status", STATUS_OK);
         }
+        return response;
+    }
+
+    public HashMap<String, Object> tambahKredit(Integer nomorRekening, Long jumlahTambahKredit) {
+        Optional<Kredit> kredit = kreditRepository.findKreditByNomorRekening(nomorRekening);
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if (kredit.isEmpty()) {
+            response.put("status", STATUS_GAGAL_NOREK);
+            response.put("pesan", "Nomor rekening tidak terdaftar.");
+        } else if (jumlahTambahKredit >= 0) {
+            jumlahTambahKredit += kredit.get().getJumlahKredit();
+            kredit.get().setJumlahKredit(jumlahTambahKredit);
+            response.put("status", STATUS_OK);
+        }
+
+        return response;
+    }
+
+    public HashMap<String, Object> getStatusKredit(Integer nomorRekening) {
+        Optional<Kredit> kredit = kreditRepository.findKreditByNomorRekening(nomorRekening);
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if (kredit.isEmpty()) {
+            response.put("status", STATUS_GAGAL_NOREK);
+            response.put("pesan", "Nomor rekening tidak terdaftar.");
+        } else {
+            response.put("status", STATUS_OK);
+            response.put("statusKredit", kredit.get().getStatusKredit());
+        }
+
+        return response;
     }
 
     public void validasiNomorRekening(Integer nomorRekening) {
@@ -81,41 +147,22 @@ public class KreditService {
         return responseBody;
     }
 
-    public Long tambahKredit(Integer nomorRekening, Long jumlahTambahKredit) {
-        List<Kredit> kreditList = getKredit();
-        for (int i = 0; i < kreditList.size(); i++) {
-            if (kreditList.get(i).getNomorRekening().equals(nomorRekening)) {
-                return kreditList.get(i).getJumlahKredit() + jumlahTambahKredit;
-            }
-        }
-        return 0L;
-    }
+    public HashMap<String, Object> postTransaksi(Integer jenisTransaksi,
+                                                 Integer statusTransaksi,
+                                                 String logTransaksi) {
+        WebClient transaksiClient = WebClient.create("http://10.10.30.34:7001");
 
-    public String getStatusKredit(Integer nomorRekening) {
-        List<Kredit> kreditList = getKredit();
-        for (int i = 0; i < kreditList.size(); i++) {
-            if (kreditList.get(i).getNomorRekening().equals(nomorRekening)) {
-                return kreditList.get(i).getStatusKredit();
-            }
-        }
-        return null;
-    }
-
-    public String testApi() {
+        HashMap<String, Object> response = new HashMap<>();
         HashMap hsmap = new HashMap();
-        hsmap.put("nomorNasabah", 456);
-        hsmap.put("jenisTransaksi", 2);
-        hsmap.put("waktuTransaksi", "2021-09-22T14:13:10");
-        hsmap.put("statusTransaksi", 1);
-        hsmap.put("logTransaksi", "Log Transaksi - Kredit");
+        hsmap.put("nomorRekening", 1);
+        hsmap.put("jenisTransaksi", jenisTransaksi);
+        hsmap.put("statusTransaksi", statusTransaksi);
+        hsmap.put("logTransaksi", logTransaksi);
 
-        WebClient tabunganClient = WebClient.create("http://10.10.30.49:7007");
-        WebClient.ResponseSpec responseSpec = tabunganClient.post()
+        WebClient.ResponseSpec responseSpec = transaksiClient.post()
                 .uri("api/transaksi")
                 .body(Mono.just(hsmap), HashMap.class)
                 .retrieve();
-
-        String responseBody = responseSpec.bodyToMono(String.class).block();
-        return responseBody;
+        return response;
     }
 }

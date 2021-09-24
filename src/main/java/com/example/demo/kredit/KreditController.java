@@ -21,50 +21,47 @@ public class KreditController {
         return kreditService.getKredit();
     }
 
-    @PostMapping
-    public void bukaKredit(@RequestBody Kredit kredit) {
-        kreditService.bukaKredit(kredit);
+    @PostMapping(path = "bukaKredit")
+    public void bukaKredit(
+            @RequestBody HashMap<String, Object> kreditBaru) {
+        kreditService.bukaKredit(kreditBaru);
     }
 
-    @DeleteMapping(path = "tutupKredit/{id}")
-    public void tutupKredit(@PathVariable("id") Long id) {
-        kreditService.tutupKredit(id);
+    @DeleteMapping(path = "tutupKredit")
+    public void tutupKredit(
+            @RequestBody Integer nomorRekening) {
+        kreditService.tutupKredit(nomorRekening);
     }
     
-    @GetMapping(path = "updateTipeKredit/{nomorRekening}/{tipeKredit}")
+    @GetMapping(path = "updateTipeKredit")
     public void updateTipeKredit(
-            @PathVariable("nomorRekening") Integer nomorRekening,
-            @PathVariable("tipeKredit") String tipeKredit) {
+            @RequestBody Integer nomorRekening,
+            @RequestBody String tipeKredit) {
         kreditService.updateTipeKredit(nomorRekening, tipeKredit);
     }
 
-    @RequestMapping(path = "validasiNomorRekening/{nomorRekening}")
+    @RequestMapping(path = "validasiNomorRekening")
     public void validasiNomorRekening(
-            @PathVariable("nomorRekening") Integer nomorRekening) {
+            @RequestBody Integer nomorRekening) {
         kreditService.validasiNomorRekening(nomorRekening);
     }
 
-    @RequestMapping(path = "bayarKredit/{nomorRekening}")
+    @RequestMapping(path = "bayarKredit")
     public void bayarKredit(
-            @PathVariable("nomorRekening") Integer nomorRekening) {
+            @RequestBody Integer nomorRekening) {
         kreditService.bayarKredit(nomorRekening);
     }
 
     @PostMapping(path = "tambahKredit")
     public void tambahKredit(
-            @RequestBody(required = true) Integer nomorRekening,
-            @RequestBody(required = true) Long jumlahTambahKredit) {
+            @RequestBody Integer nomorRekening,
+            @RequestBody Long jumlahTambahKredit) {
         kreditService.tambahKredit(nomorRekening, jumlahTambahKredit);
     }
 
     @GetMapping(path = "statusKredit")
     public void getStatusKredit(
-            @RequestBody(required = true) Integer nomorRekening) {
+            @RequestBody Integer nomorRekening) {
         kreditService.getStatusKredit(nomorRekening);
-    }
-
-    @GetMapping(path = "testApi")
-    public void testApi(){
-        kreditService.testApi();
     }
 }
