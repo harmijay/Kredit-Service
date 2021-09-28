@@ -22,46 +22,46 @@ public class KreditController {
     }
 
     @PostMapping(path = "bukaKredit")
-    public void bukaKredit(
-            @RequestBody HashMap<String, Object> kreditBaru) {
-        kreditService.bukaKredit(kreditBaru);
+    public HashMap<String, Object> bukaKredit(
+            @RequestParam HashMap<String, Object> kreditBaru) {
+        return kreditService.bukaKredit(kreditBaru);
     }
 
     @DeleteMapping(path = "tutupKredit")
-    public void tutupKredit(
-            @RequestBody Integer nomorRekening) {
-        kreditService.tutupKredit(nomorRekening);
+    public HashMap<String, Object> tutupKredit(
+            @RequestParam Integer nomorRekening) {
+        return kreditService.tutupKredit(nomorRekening);
     }
     
     @GetMapping(path = "updateTipeKredit")
-    public void updateTipeKredit(
-            @RequestBody Integer nomorRekening,
-            @RequestBody String tipeKredit) {
-        kreditService.updateTipeKredit(nomorRekening, tipeKredit);
-    }
-
-    @RequestMapping(path = "validasiNomorRekening")
-    public void validasiNomorRekening(
-            @RequestBody Integer nomorRekening) {
-        kreditService.validasiNomorRekening(nomorRekening);
-    }
-
-    @RequestMapping(path = "bayarKredit")
-    public void bayarKredit(
-            @RequestBody Integer nomorRekening) {
-        kreditService.bayarKredit(nomorRekening);
+    public HashMap<String, Object> updateTipeKredit(
+            @RequestParam Integer nomorRekening,
+            @RequestParam String tipeKredit) {
+        return kreditService.updateTipeKredit(nomorRekening, tipeKredit);
     }
 
     @PostMapping(path = "tambahKredit")
-    public void tambahKredit(
-            @RequestBody Integer nomorRekening,
-            @RequestBody Long jumlahTambahKredit) {
-        kreditService.tambahKredit(nomorRekening, jumlahTambahKredit);
+    public HashMap<String, Object> tambahKredit(
+            @RequestParam Integer nomorRekening,
+            @RequestParam Long jumlahTambahKredit) {
+        return kreditService.tambahKredit(nomorRekening, jumlahTambahKredit);
     }
 
     @GetMapping(path = "statusKredit")
-    public void getStatusKredit(
-            @RequestBody Integer nomorRekening) {
-        kreditService.getStatusKredit(nomorRekening);
+    public HashMap<String, Object> getStatusKredit(
+            @RequestParam Integer nomorRekening) {
+        return kreditService.getStatusKredit(nomorRekening);
+    }
+
+    @RequestMapping(path = "validasiNomorRekening")
+    public HashMap<String, Object> validasiNomorRekening(
+            @RequestParam Integer nomorRekening) {
+        return kreditService.validasiNomorRekening(nomorRekening);
+    }
+
+    @RequestMapping(path = "bayarKredit")
+    public String bayarKredit(
+            @RequestParam Integer nomorRekening) {
+        return kreditService.bayarKredit(nomorRekening);
     }
 }
